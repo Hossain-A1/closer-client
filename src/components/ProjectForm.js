@@ -1,48 +1,99 @@
 import { useState } from "react";
+import { useProjectsContext } from "../hooks/useProjectsContext";
 
-const ProjectForm = () => {
+export const ProjectForm = ({ project, setModal, setOverlay }) => {
   const [title, setTitle] = useState("");
   const [tech, setTech] = useState("");
   const [budget, setBudget] = useState("");
   const [manager, setManager] = useState("");
-  const [dev, setDev] = useState("");
   const [duration, setDuration] = useState("");
+  const [dev, setDev] = useState("");
   const [error, setError] = useState(null);
+  const [emptyFields, setEmptyfields] = useState([]);
+  const { dispatch } = useProjectsContext();
 
   const handleProjectForm = async (e) => {
     e.preventDefault();
     //post req
+    const projectData = { title, tech, budget, manager, dev, duration, error };
+    //  when no project
+    if (!project) {
+      const res = await fetch("http://localhost:5000/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(projectData),
+      });
 
-    const project = { title, tech, budget, manager, dev, duration };
+      const json = await res.json();
 
-    const res = await fetch("http://localhost:5000/api/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(project),
-    });
-    const json = await res.json();
+      if (!res.ok) {
+        setError(json.error);
+        setEmptyfields(json.emptyFields);
+      }
 
-    if (!res.ok) {
-      setError(json.error);
+      // res ok
+      if (res.ok) {
+        setTitle("");
+        setTech("");
+        setBudget("");
+        setManager("");
+        setDuration("");
+        setDev("");
+        setError(null);
+        setEmptyfields([]);
+        dispatch({ type: "CREATE_PROJECT", payload: json });
+      }
+      return;
     }
-    // res ok
-    if (res.ok) {
-      setTitle("");
-      setTech("");
-      setBudget("");
-      setManager("");
-      setDev("");
-      setDuration("");
-      console.log("A new project added");
-      setError(null);
+
+    // when project
+    if (project) {
+      const res = await fetch(
+        `http://localhost:5000/api/projects/${project._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(projectData),
+        }
+      );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        setError(json.error);
+        setEmptyfields(json.emptyFields);
+      }
+
+      if (res.ok) {
+        setTitle("");
+        setTech("");
+        setBudget("");
+        setManager("");
+        setDuration("");
+        setDev("");
+        setError(null);
+        setModal(false);
+        setOverlay(false);
+        setEmptyfields([]);
+        dispatch({ type: "UPDATE_PROJECT", payload: json });
+      }
+      return;
     }
   };
 
   return (
     <form onSubmit={handleProjectForm} className="lg:px-0 px-3">
-      <h2 className="text-3xl text-teal-700 capitalize">Add a new project</h2>
+      <h2
+        className={`text-3xl text-teal-700 capitalize ${
+          project ? "hidden" : ""
+        }`}
+      >
+        Add a new project
+      </h2>
       <div className="flex flex-col space-y-2 mt-2">
         <label
           htmlFor="title"
@@ -53,11 +104,12 @@ const ProjectForm = () => {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          required
           id="title"
           type="text"
           placeholder="e.g E-shop"
-          className="py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300"
+          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
+            emptyFields.includes("title") ? "border-rose-600/50" : "border-2"
+          }`}
         />
 
         <label
@@ -69,11 +121,12 @@ const ProjectForm = () => {
         <input
           value={tech}
           onChange={(e) => setTech(e.target.value)}
-          required
           id="tech"
           type="text"
           placeholder="e.g react,node, etc"
-          className="py-3 px-2 border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300"
+          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
+            emptyFields.includes("tech") ? "border-rose-600/50" : "border-2"
+          }`}
         />
 
         <label
@@ -85,11 +138,12 @@ const ProjectForm = () => {
         <input
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
-          required
           id="budget"
           type="number"
           placeholder="e.g $590,$990"
-          className="py-3 px-2 border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300"
+          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
+            emptyFields.includes("budget") ? "border-rose-600/50" : "border-2"
+          }`}
         />
 
         <label
@@ -101,27 +155,12 @@ const ProjectForm = () => {
         <input
           value={manager}
           onChange={(e) => setManager(e.target.value)}
-          required
           id="manager"
           type="text"
           placeholder="e.g Jon smit"
-          className="py-3 px-2 border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300"
-        />
-
-        <label
-          htmlFor="developers"
-          className="text-black text-xl font-semibold tracking-widest"
-        >
-          Developers
-        </label>
-        <input
-          value={dev}
-          onChange={(e) => setDev(e.target.value)}
-          required
-          id="developers"
-          type="number"
-          placeholder="e.g 2,3,9"
-          className="py-3 px-2 border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300"
+          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
+            emptyFields.includes("manager") ? "border-rose-600/50" : "border-2"
+          }`}
         />
 
         <label
@@ -133,22 +172,43 @@ const ProjectForm = () => {
         <input
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
-          required
           id="duration"
           type="number"
           placeholder="e.g 3hours"
-          className="py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300"
+          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
+            emptyFields.includes("duration") ? "border-rose-600/50" : "border-2"
+          }`}
+        />
+        <label
+          htmlFor="developers"
+          className="text-black text-xl font-semibold tracking-widest"
+        >
+          Developers
+        </label>
+        <input
+          value={dev}
+          onChange={(e) => setDev(e.target.value)}
+          id="developers"
+          type="number"
+          placeholder="e.g 2,3,9"
+          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
+            emptyFields.includes("dev") ? "border-rose-600/50" : "border-2"
+          }`}
         />
       </div>
-      <div className="mt-5">
+      <div className="py-5">
         <button
           type="submit"
-          className="py-3 rounded  px-2 w-full bg-teal-600 hover:bg-teal-700 duration-300 text-white font-semibold uppercase text-sm tracking-widest"
+          className="py-4 rounded  px-2 w-full bg-teal-600 hover:bg-teal-700 duration-300 text-white font-semibold uppercase text-sm tracking-widest"
         >
-          Add project
+          {project ? "Update now" : "Add project"}
         </button>
       </div>
-      {error && <p>{error}</p>}
+      {error && (
+        <p className="p-5 border border-rose-700 bg-rose-300 rounded text-rose-700">
+          {error}
+        </p>
+      )}
     </form>
   );
 };
