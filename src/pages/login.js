@@ -1,0 +1,59 @@
+import { useState } from "react";
+import {useLogin} from "../hooks/useLogin"
+
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const {login,error} =useLogin()
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+
+    // login user
+login(email,password)
+    
+
+  };
+
+  return (
+    <form
+      onSubmit={handleSignup}
+      className="signup flex flex-col lg:w-[30vw] w-full lg:px-0 px-2 container mx-auto py-10 gap-5"
+    >
+      <h2 className="text-xl text-teal-700 font-semibold">Login</h2>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="email" className="text-slate-500 font-medium text-lg">Email</label>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          id="email"
+          placeholder="e-g, hossain@react.dev"
+          className="py-3 px-6 outline-none border focus:border-teal-700 duration-300 bg-slate-200 rounded"
+        />
+        <label htmlFor="password" className="text-slate-500 font-medium text-lg">Password</label>
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+          id="password"
+          placeholder="e-g, Ab*********34"
+          className="py-3 px-6 outline-none border focus:border-teal-700 duration-300 bg-slate-200 rounded"
+        />
+      </div>
+      <button
+        type="submit"
+        className="btn btn-primary"
+      >
+        login
+      </button>
+      {error && (
+        <p className="p-5 border border-rose-700 bg-rose-300 rounded text-rose-700">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+};
+
+export default Login;

@@ -1,19 +1,24 @@
 import { useState } from "react";
 import { useProjectsContext } from "../hooks/useProjectsContext";
+import { useUserContext } from "../hooks/useUserContext";
 
 export const ProjectForm = ({ project, setModal, setOverlay }) => {
-  const [title, setTitle] = useState("");
-  const [tech, setTech] = useState("");
-  const [budget, setBudget] = useState("");
-  const [manager, setManager] = useState("");
-  const [duration, setDuration] = useState("");
-  const [dev, setDev] = useState("");
+  const [title, setTitle] = useState(project ? project.title : "");
+  const [tech, setTech] = useState(project ? project.tech : "");
+  const [budget, setBudget] = useState(project ? project.budget : "");
+  const [manager, setManager] = useState(project ? project.manager : "");
+  const [duration, setDuration] = useState(project ? project.duration : "");
+  const [dev, setDev] = useState(project ? project.dev : "");
   const [error, setError] = useState(null);
   const [emptyFields, setEmptyfields] = useState([]);
   const { dispatch } = useProjectsContext();
+  const { user } = useUserContext();
 
   const handleProjectForm = async (e) => {
     e.preventDefault();
+    if (!user) {
+      setError("You must be logged in!");
+    }
     //post req
     const projectData = { title, tech, budget, manager, dev, duration, error };
     //  when no project
@@ -22,7 +27,9 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
         },
+
         body: JSON.stringify(projectData),
       });
 
@@ -41,9 +48,9 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
         setManager("");
         setDuration("");
         setDev("");
-        setError(null);
         setEmptyfields([]);
         dispatch({ type: "CREATE_PROJECT", payload: json });
+        setError(null);
       }
       return;
     }
@@ -56,6 +63,7 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
           },
           body: JSON.stringify(projectData),
         }
@@ -88,7 +96,7 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
   return (
     <form onSubmit={handleProjectForm} className="lg:px-0 px-3">
       <h2
-        className={`text-3xl text-teal-700 capitalize ${
+        className={`text-3xl text-green-900 capitalize ${
           project ? "hidden" : ""
         }`}
       >
@@ -97,7 +105,7 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
       <div className="flex flex-col space-y-2 mt-2">
         <label
           htmlFor="title"
-          className="text-black text-xl font-semibold tracking-widest cursor-pointer"
+          className="text-black/70 text-xl font-semibold tracking-widest cursor-pointer"
         >
           Title
         </label>
@@ -107,14 +115,14 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           id="title"
           type="text"
           placeholder="e.g E-shop"
-          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
-            emptyFields.includes("title") ? "border-rose-600/50" : "border-2"
+          className={`py-3 px-2 rounded border-2 outline-none bg-slate-100 text-teal-700 focus:border-green-900 duration-300 ${
+            emptyFields?.includes("title") ? "border-rose-600/50" : "border-2"
           }`}
         />
 
         <label
           htmlFor="tech"
-          className="text-black text-xl font-semibold tracking-widest"
+          className="text-black/70 text-xl font-semibold tracking-widest"
         >
           Tech
         </label>
@@ -124,14 +132,14 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           id="tech"
           type="text"
           placeholder="e.g react,node, etc"
-          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
-            emptyFields.includes("tech") ? "border-rose-600/50" : "border-2"
+          className={`py-3 px-2 rounded border-2 outline-none bg-slate-100 text-teal-700 focus:border-green-900 duration-300 ${
+            emptyFields?.includes("tech") ? "border-rose-600/50" : "border-2"
           }`}
         />
 
         <label
           htmlFor="budget"
-          className="text-black text-xl font-semibold tracking-widest"
+          className="text-black/70 text-xl font-semibold tracking-widest"
         >
           Budget
         </label>
@@ -141,14 +149,14 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           id="budget"
           type="number"
           placeholder="e.g $590,$990"
-          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
-            emptyFields.includes("budget") ? "border-rose-600/50" : "border-2"
+          className={`py-3 px-2 rounded border-2 outline-none bg-slate-100 text-teal-700 focus:border-green-900 duration-300 ${
+            emptyFields?.includes("budget") ? "border-rose-600/50" : "border-2"
           }`}
         />
 
         <label
           htmlFor="manager"
-          className="text-black text-xl font-semibold tracking-widest"
+          className="text-black/70 text-xl font-semibold tracking-widest"
         >
           Manager
         </label>
@@ -158,14 +166,14 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           id="manager"
           type="text"
           placeholder="e.g Jon smit"
-          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
-            emptyFields.includes("manager") ? "border-rose-600/50" : "border-2"
+          className={`py-3 px-2 rounded border-2 outline-none bg-slate-100 text-teal-700 focus:border-green-900 duration-300 ${
+            emptyFields?.includes("manager") ? "border-rose-600/50" : "border-2"
           }`}
         />
 
         <label
           htmlFor="duration"
-          className="text-black text-xl font-semibold tracking-widest"
+          className="text-black/70 text-xl font-semibold tracking-widest"
         >
           Duration
         </label>
@@ -175,13 +183,15 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           id="duration"
           type="number"
           placeholder="e.g 3hours"
-          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
-            emptyFields.includes("duration") ? "border-rose-600/50" : "border-2"
+          className={`py-3 px-2 rounded border-2 outline-none bg-slate-100 text-teal-700 focus:border-green-900 duration-300 ${
+            emptyFields?.includes("duration")
+              ? "border-rose-600/50"
+              : "border-2"
           }`}
         />
         <label
           htmlFor="developers"
-          className="text-black text-xl font-semibold tracking-widest"
+          className="text-black/70 text-xl font-semibold tracking-widest"
         >
           Developers
         </label>
@@ -191,15 +201,15 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
           id="developers"
           type="number"
           placeholder="e.g 2,3,9"
-          className={`py-3 px-2  border-2 outline-none bg-slate-100 text-teal-700 focus:border-teal-700 duration-300 ${
-            emptyFields.includes("dev") ? "border-rose-600/50" : "border-2"
+          className={`py-3 px-2 rounded border-2 outline-none bg-slate-100 text-teal-700 focus:border-green-900 duration-300 ${
+            emptyFields?.includes("dev") ? "border-rose-600/50" : "border-2"
           }`}
         />
       </div>
       <div className="py-5">
         <button
           type="submit"
-          className="py-4 rounded  px-2 w-full bg-teal-600 hover:bg-teal-700 duration-300 text-white font-semibold uppercase text-sm tracking-widest"
+          className="btn btn-primary w-full py-4 text-center rounded"
         >
           {project ? "Update now" : "Add project"}
         </button>
