@@ -8,7 +8,7 @@ const Home = () => {
   const { projects, dispatch } = useProjectsContext();
   useEffect(() => {
     const getProjects = async () => {
-      const res = await fetch("http://localhost:5000/api/projects", {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/api/projects`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },

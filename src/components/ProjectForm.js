@@ -23,7 +23,7 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
     const projectData = { title, tech, budget, manager, dev, duration, error };
     //  when no project
     if (!project) {
-      const res = await fetch("http://localhost:5000/api/projects", {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/api/projects`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export const ProjectForm = ({ project, setModal, setOverlay }) => {
     // when project
     if (project) {
       const res = await fetch(
-        `http://localhost:5000/api/projects/${project._id}`,
+        `${process.env.REACT_APP_BASE_URL}/api/projects/${project._id}`,
         {
           method: "PATCH",
           headers: {
